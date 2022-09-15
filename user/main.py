@@ -24,10 +24,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @app.post("/create",status_code = status.HTTP_201_CREATED)
 
-def create_user(request : schemas.User ,db : Session = Depends(get_db)):
+def create_user(request : schemas.Userdetail ,db : Session = Depends(get_db)):
 
     hashed_password = pwd_context.hash(request.password)
-    new_user = models.User(name = request.name ,email = request.email ,password = hashed_password)
+    new_user = models.Userdetail(name = request.name ,email = request.email ,password = hashed_password)
     db.add(new_user)
     db.commit()
     db.refresh(new_user) 
@@ -38,31 +38,34 @@ def create_user(request : schemas.User ,db : Session = Depends(get_db)):
 
 def read_users(db : Session = Depends(get_db)):
     
-    user_list = db.query(models.User).all()
+    user_list = db.query(models.Userdetail).all()
     return user_list
 
 # To delete the user from the table 
 @app.delete('/delete/{id}',status_code = status.HTTP_204_NO_CONTENT) 
 
 def delete_user(id ,db : Session = Depends(get_db)):
-    user_delete = db.query(models.User).filter(models.User.id == id)
-    if not user_delete.first():
+    user_delete = db.query(models.Userdetail).filter(models.Userdetail.id == id).first()
+    if not user_delete:
 
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "User is not found")
 
-    user_delete.delete(synchronize_session=False)
+    else:
+        db.query(models.Userdetail).filter(models.Userdetail.id == id).delete(synchronize_session=False)
     db.commit()
-    return "User has been deleted successfully" 
+    return "Deleted" 
 
 # Update the details of users in the table 
 
 @app.put("/update/{id}",status_code=status.HTTP_202_ACCEPTED)
-def update_details(id, request : schemas.User,db : Session = Depends(get_db)):
-    user_update = db.query(models.User).filter(models.User.id == id)
-    #if not user_update.first():
+def update_details(id, request : schemas.Userdetail,db : Session = Depends(get_db)):
+    user_update = db.query(models.Userdetail).filter(models.Userdetail.id == id).first()
+    if not user_update:
 
-        #raise HTTPException(status_code = status.HTTP_404_NOT_FOUND , detail = "User not found")
-    user_update.update(request)
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND , detail = "User not found")
+    else:
+        db.query(models.Userdetail).filter(models.Userdetail.id == id).update(request.dict())
     db.commit()
-    return "Updated user details"
+    db.refresh(user_update)
+    return "updated"
 
