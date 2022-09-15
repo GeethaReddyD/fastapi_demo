@@ -54,3 +54,15 @@ def delete_user(id ,db : Session = Depends(get_db)):
     db.commit()
     return "User has been deleted successfully" 
 
+# Update the details of users in the table 
+
+@app.put("/update/{id}",status_code=status.HTTP_202_ACCEPTED)
+def update_details(id, request : schemas.User,db : Session = Depends(get_db)):
+    user_update = db.query(models.User).filter(models.User.id == id)
+    #if not user_update.first():
+
+        #raise HTTPException(status_code = status.HTTP_404_NOT_FOUND , detail = "User not found")
+    user_update.update(request)
+    db.commit()
+    return "Updated user details"
+
