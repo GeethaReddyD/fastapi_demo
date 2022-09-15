@@ -1,5 +1,5 @@
 from fastapi import FastAPI,Depends,status
-from . import schemas,models 
+from . import models 
 from .database import engine,SessionLocal 
 
 
