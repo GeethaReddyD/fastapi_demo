@@ -32,9 +32,12 @@ def create_user(request : schemas.User ,db : Session = Depends(get_db)):
     db.refresh(new_user) 
     return new_user
     
+# To get all the user details
+@app.get("/read", status_code = status.HTTP_200_OK)
 
-
-
-
+def read_users(db : Session = Depends(get_db)):
+    
+    user_list = db.query(models.User).all()
+    return user_list
 
 
