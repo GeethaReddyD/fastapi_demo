@@ -1,4 +1,5 @@
-from fastapi import FastAPI,Depends,status
+
+from fastapi import FastAPI,Depends,status,HTTPException
 from . import schemas,models 
 from .database import engine,SessionLocal 
 from sqlalchemy.orm import Session 
@@ -40,4 +41,16 @@ def read_users(db : Session = Depends(get_db)):
     user_list = db.query(models.User).all()
     return user_list
 
+# To delete the user from the table 
+@app.delete('/delete/{id}',status_code = status.HTTP_204_NO_CONTENT) 
+
+def delete_user(id ,db : Session = Depends(get_db)):
+    user_delete = db.query(models.User).filter(models.User.id == id)
+    if not user_delete.first():
+
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "User is not found")
+
+    user_delete.delete(synchronize_session=False)
+    db.commit()
+    return "User has been deleted successfully" 
 
