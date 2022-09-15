@@ -23,10 +23,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @app.post("/create",status_code = status.HTTP_201_CREATED)
 
-def create_user(request : schemas.User ,db : Session = Depends(get_db)):
+def create_user(request : schemas.Userdetail ,db : Session = Depends(get_db)):
 
     hashed_password = pwd_context.hash(request.password)
-    new_user = models.User(name = request.name ,email = request.email ,password = hashed_password)
+    new_user = models.Userdetail(name = request.name ,email = request.email ,password = hashed_password)
     db.add(new_user)
     db.commit()
     db.refresh(new_user) 
@@ -37,7 +37,7 @@ def create_user(request : schemas.User ,db : Session = Depends(get_db)):
 
 def read_users(db : Session = Depends(get_db)):
     
-    user_list = db.query(models.User).all()
+    user_list = db.query(models.Userdetail).all()
     return user_list
 
 
