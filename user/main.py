@@ -67,5 +67,10 @@ def update_details(id, request : schemas.Userdetail,db : Session = Depends(get_d
         db.query(models.Userdetail).filter(models.Userdetail.id == id).update(request.dict())
     db.commit()
     db.refresh(user_update)
-    return "updated"
+    return "updated" 
 
+@app.get("/limitdata", status_code= status.HTTP_200_OK)
+
+def limited_users(db : Session = Depends(get_db),skip: int = 0, limit: int = 2):
+    user_list = db.query(models.Userdetail).offset(skip).limit(limit).all()
+    return user_list
