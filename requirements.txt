@@ -4,3 +4,5 @@ sqlalchemy
 passlib
 bcrypt
 alembic
+requests
+pytest 

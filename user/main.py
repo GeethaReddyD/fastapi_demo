@@ -26,10 +26,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def create_user(request: schemas.User, db: Session=Depends(get_db)):
     hashed_password = pwd_context.hash(request.password)
     new_user = models.User(name=request.name, email=request.email, password=hashed_password)
-    db.add(new_user)
+    if new_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="User already exists")
+    else:
+        db.add(new_user)
     db.commit()
     db.refresh(new_user) 
-    return new_user
+    return "New user is added successfully"
     
 # To get all the user details
 @app.get("/read", status_code=status.HTTP_200_OK)
@@ -39,10 +42,10 @@ def read_users(db: Session=Depends(get_db)):
 
 # To delete the user from the table 
 @app.delete("/delete/{id}",status_code=status.HTTP_204_NO_CONTENT) 
-def delete_user(id, db: Session= Depends(get_db)):
+def delete_user(id: int, db: Session= Depends(get_db)):
     user_delete = db.query(models.User).filter(models.User.id==id).first()
     if not user_delete:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User is not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
     else:
         db.query(models.User).filter(models.User.id==id).delete(synchronize_session=False)
     db.commit()
@@ -50,7 +53,7 @@ def delete_user(id, db: Session= Depends(get_db)):
 # Update the details of users in the table 
 
 @app.put("/update/{id}", status_code=status.HTTP_202_ACCEPTED)
-def update_details(id, request: schemas.User, db: Session=Depends(get_db)):
+def update_details(id: int, request: schemas.ShowUser, db: Session=Depends(get_db)):
     user_update = db.query(models.User).filter(models.User.id==id).first()
     if not user_update:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found")
